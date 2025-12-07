@@ -32,18 +32,18 @@
 
 ## About
 
-[1-2 sentence description of what the contract does and its purpose]
+FundMe is a fundraising contract that accepts ETH donations above a minimum USD threshold. It uses Chainlink price feeds to verify donation amounts in real-time, ensuring only contributions meeting the specified value requirement are accepted.
 
 ### Key Features
 
-- Feature 1
-- Feature 2
-- Feature 3
+- Accept ETH donations with USD value validation via Chainlink oracles
+- Owner-only withdrawal functionality with automatic funder tracking
+- Automatic fund reset after withdrawal to restart fundraising
 
 **Tech Stack:**
 - Solidity ^0.8.x
 - Foundry
-- [Other dependencies]
+- Chainlink Price Feeds
 
 ### Architecture
 
@@ -77,19 +77,20 @@
 
 **Contract Structure:**
 ```
-project-name/
+foundry-fundraiser/
 ├── src/
-│   ├── MainContract.sol       # Core contract logic
-│   └── PriceConverter.sol     # Helper library (if applicable)
+│   ├── FundMe.sol             # Core fundraising contract
+│   └── PriceConverter.sol     # Price feed helper library
 ├── script/
-│   ├── DeployContract.s.sol   # Deployment script
-│   └── Interactions.s.sol     # Interaction scripts
+│   ├── DeployFundMe.s.sol     # Deployment script
+│   ├── HelperConfig.s.sol     # Network configuration
+│   └── Interactions.s.sol     # Fund and withdraw 
 ├── test/
 │   ├── unit/
-│   │   └── ContractTest.t.sol
+│   │   └── FundMeTest.t.sol
 │   └── integration/
 │       └── InteractionsTest.t.sol
-└── lib/                        # Dependencies
+└── lib/                        # Dependencies (forge-std, chainlink-brownie-contracts)
 ```
 
 ## Getting Started
@@ -126,7 +127,7 @@ forge build
    ```
 
 3. **Get testnet ETH:**
-   - Sepolia Faucet: [Link to faucet]
+   - Sepolia Faucet: [SEPOLIA](https://cloud.google.com/application/web3/faucet/ethereum/sepolia)
 
 **⚠️ Security Warning:**
 - Never commit your `.env` file
@@ -187,11 +188,21 @@ make deploy
 
 ### Interact with Contract
 
-[Examples of how to interact with your contract using cast or scripts]
+Use the provided Interactions script to fund and withdraw:
 
 ```bash
-# Example command
-cast send <CONTRACT_ADDRESS> "functionName()" --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY
+# Fund the contract
+forge script script/Interactions.s.sol:FundFundMe --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast
+
+# Withdraw funds (owner only)
+forge script script/Interactions.s.sol:WithdrawFundMe --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast
+```
+
+Or use cast directly:
+
+```bash
+# Send a fund transaction
+cast send <FUNDME_ADDRESS> "fund()" --value 1ether --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY
 ```
 
 ## Deployment
@@ -238,27 +249,32 @@ For production use, consider:
 
 ### Known Limitations
 
-- [Limitation 1 - e.g., centralized owner control]
-- [Limitation 2 - e.g., no withdrawal limits]
-- [Limitation 3 - e.g., relies on external oracle]
+- Centralized owner control with withdrawal privileges
+- Relies on Chainlink price feeds for USD conversion (oracle dependency)
+- Fund reset clears all funder records after withdrawal
 
 **Centralization Risks:**
-- [Explain any admin/owner privileges]
+- Only the contract owner can withdraw funds
+- Owner can reset the fundraising campaign at any time
 
 **Oracle Dependencies:**
-- [Explain reliance on Chainlink or other oracles]
+- Contract depends on Chainlink ETH/USD price feeds for validation
+- Price feed availability and accuracy affect donation acceptance
 
 ## Gas Optimization
 
-Current gas benchmarks (from `.gas-snapshot`):
-
-| Function | Gas Cost |
-|----------|----------|
-| `function1` | ~XXX,XXX |
-| `function2` | ~XXX,XXX |
-| `function3` | ~XXX,XXX |
+| Function   | Gas Cost |
+|------------|----------|
+| `fund`     | ~86,722  |
+| `withdraw` | ~55,768  |
+| `receive`  | ~71,259  |
+| `fallback` | ~104,750 |
 
 Generate gas snapshot:
+
+```bash
+forge test --gas-report
+```
 
 ```bash
 forge snapshot
