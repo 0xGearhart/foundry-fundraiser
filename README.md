@@ -123,7 +123,7 @@ forge build
    SEPOLIA_RPC_URL=your_sepolia_rpc_url_here
    MAINNET_RPC_URL=your_mainnet_rpc_url_here
    ETHERSCAN_API_KEY=your_etherscan_api_key_here
-   PRIVATE_KEY=your_private_key_here
+   DEFAULT_KEY_ADDRESS=public_address_of_your_encrypted_private_key_here
    ```
 
 3. **Get testnet ETH:**
@@ -192,17 +192,17 @@ Use the provided Interactions script to fund and withdraw:
 
 ```bash
 # Fund the contract
-forge script script/Interactions.s.sol:FundFundMe --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast
+forge script script/Interactions.s.sol:FundFundMe --rpc-url $SEPOLIA_RPC_URL --account defaultKey --broadcast
 
 # Withdraw funds (owner only)
-forge script script/Interactions.s.sol:WithdrawFundMe --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast
+forge script script/Interactions.s.sol:WithdrawFundMe --rpc-url $SEPOLIA_RPC_URL --account defaultKey --broadcast
 ```
 
 Or use cast directly:
 
 ```bash
 # Send a fund transaction
-cast send <FUNDME_ADDRESS> "fund()" --value 1ether --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY
+cast send <FUNDME_ADDRESS> "fund()" --value 1ether --rpc-url $SEPOLIA_RPC_URL --account defaultKey
 ```
 
 ## Deployment
@@ -218,7 +218,7 @@ make deploy ARGS="--network sepolia"
 Or using forge directly:
 
 ```bash
-forge script script/DeployFundMe.s.sol:DeployFundMe --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY -vvvv
+forge script script/DeployFundMe.s.sol:DeployFundMe --rpc-url $SEPOLIA_RPC_URL --account defaultKey --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY -vvvv
 ```
 
 ### Verify Contract
